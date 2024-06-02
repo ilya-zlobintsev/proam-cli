@@ -1,0 +1,18 @@
+[package]
+name = "proam-cli"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.86"
+btleplug = "0.11.5"
+clap = { version = "4.5.4", features = ["derive"] }
+crc16 = "0.4.0"
+futures = "0.3.30"
+prometheus = "0.13.4"
+prometheus_exporter = "0.8.5"
+strum = { version = "0.26.2", features = ["derive"] }
+tokio = { version = "1.38.0", features = ["rt", "macros"] }
+
+[dev-dependencies]
+pretty_assertions = "1.4.0"
