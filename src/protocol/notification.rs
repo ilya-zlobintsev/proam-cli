@@ -60,7 +60,7 @@ fn process_value(value: &[u8]) -> Option<StatsUpdate> {
     }
 
     match key {
-        0x04 if value.len() >= 9 => Some(StatsUpdate::Power(Power {
+        0x04 if value.len() >= 8 => Some(StatsUpdate::Power(Power {
             batteries_one_power: parse_u16(&value[0..2]),
             batteries_two_power: parse_u16(&value[2..4]),
             inverter_one_power: parse_u16(&value[4..6]),
@@ -71,19 +71,19 @@ fn process_value(value: &[u8]) -> Option<StatsUpdate> {
             discharge_time: parse_u16(&value[21..23]),
             battery_capacity_power: value[23],
         })),
-        0x0b if value.len() >= 9 => {
+        0x0b if value.len() >= 8 => {
             let buf = &value[6..8];
             let ac_power = u16::from_le_bytes(buf.try_into().unwrap());
             Some(StatsUpdate::AcPower(ac_power))
         }
-        0x0c if value.len() >= 11 => Some(StatsUpdate::DcPower(DcPower {
+        0x0c if value.len() >= 10 => Some(StatsUpdate::DcPower(DcPower {
             type_c_one_power: parse_u16(&value[0..2]),
             type_c_two_power: parse_u16(&value[2..4]),
             usb_one_power: parse_u16(&value[4..6]),
             usb_two_power: parse_u16(&value[6..8]),
             total: parse_u16(&value[8..10]),
         })),
-        0x0f if value.len() >= 5 => Some(StatsUpdate::TotalPower(TotalPower {
+        0x0f if value.len() >= 4 => Some(StatsUpdate::TotalPower(TotalPower {
             input: parse_u16(&value[0..2]),
             output: parse_u16(&value[2..4]),
         })),
