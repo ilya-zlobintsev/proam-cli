@@ -60,39 +60,39 @@ fn process_value(value: &[u8]) -> Option<StatsUpdate> {
     }
 
     match key {
-        0x04 => Some(StatsUpdate::Power(Power {
+        0x04 if value.len() >= 9 => Some(StatsUpdate::Power(Power {
             batteries_one_power: parse_u16(&value[0..2]),
             batteries_two_power: parse_u16(&value[2..4]),
             inverter_one_power: parse_u16(&value[4..6]),
             inverter_two_power: parse_u16(&value[6..8]),
         })),
-        0x09 => Some(StatsUpdate::Capacity(CapacityInfo {
+        0x09 if value.len() >= 24 => Some(StatsUpdate::Capacity(CapacityInfo {
             charge_time: parse_u16(&value[19..21]),
             discharge_time: parse_u16(&value[21..23]),
             battery_capacity_power: value[23],
         })),
-        0x0b => {
+        0x0b if value.len() >= 9 => {
             let buf = &value[6..8];
             let ac_power = u16::from_le_bytes(buf.try_into().unwrap());
             Some(StatsUpdate::AcPower(ac_power))
         }
-        0x0c => Some(StatsUpdate::DcPower(DcPower {
+        0x0c if value.len() >= 11 => Some(StatsUpdate::DcPower(DcPower {
             type_c_one_power: parse_u16(&value[0..2]),
             type_c_two_power: parse_u16(&value[2..4]),
             usb_one_power: parse_u16(&value[4..6]),
             usb_two_power: parse_u16(&value[6..8]),
             total: parse_u16(&value[8..10]),
         })),
-        0x0f => Some(StatsUpdate::TotalPower(TotalPower {
+        0x0f if value.len() >= 5 => Some(StatsUpdate::TotalPower(TotalPower {
             input: parse_u16(&value[0..2]),
             output: parse_u16(&value[2..4]),
         })),
-        0x13 => {
+        0x13 if !value.is_empty() => {
             let mode = FlashlightMode::from_repr(value[0] as usize).unwrap();
             Some(StatsUpdate::FlashlightStatus(mode))
         }
-        0x15 => Some(StatsUpdate::ElectricQuantityPower(value[0])),
-        0x16 => Some(StatsUpdate::Status(Status {
+        0x15 if !value.is_empty() => Some(StatsUpdate::ElectricQuantityPower(value[0])),
+        0x16 if value.len() >= 12 => Some(StatsUpdate::Status(Status {
             low_noise: value[0] != 0,
             low_battery_warning: value[1] != 0,
             usb_switch: value[2] != 0,
