@@ -25,6 +25,9 @@ async fn main() -> anyhow::Result<()> {
         args::Command::Exporter { port } => {
             commands::exporter(&adapter, &args.device_name, port).await
         }
+        args::Command::Flashlight { mode } => {
+            commands::flashlight(&adapter, &args.device_name, mode).await
+        }
     }
 }
 

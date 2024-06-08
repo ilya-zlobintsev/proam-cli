@@ -1,3 +1,4 @@
+use clap::Subcommand;
 use futures::{Stream, StreamExt};
 use strum::{Display, FromRepr};
 
@@ -37,7 +38,7 @@ pub struct Power {
 //     }
 // }
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy, FromRepr, Default, Display)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, FromRepr, Default, Display, Subcommand)]
 pub enum FlashlightMode {
     #[default]
     Off = 0,
@@ -120,7 +121,7 @@ pub async fn build_device_info(
             Some(electric_quantity_power),
             Some(capacity),
         ) = (
-        power,
+            power,
             total_power,
             ac_power,
             flashlight,

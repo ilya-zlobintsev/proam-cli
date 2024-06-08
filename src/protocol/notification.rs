@@ -117,7 +117,9 @@ fn parse_u16(data: &[u8]) -> u16 {
 #[cfg(test)]
 mod tests {
     use super::{process_notification, StatsUpdate};
-    use crate::protocol::device_info::{CapacityInfo, DcPower, FlashlightMode, Status, TotalPower};
+    use crate::protocol::device_info::{
+        CapacityInfo, DcPower, FlashlightMode, Power, Status, TotalPower,
+    };
     use pretty_assertions::assert_eq;
 
     fn assert_stats(data: &[u8], expected_updates: &[StatsUpdate]) {
@@ -269,12 +271,12 @@ mod tests {
         assert_stats(
             &data,
             &[
-                // StatsUpdate::Power {
-                //     batteries_one_power: 68,
-                //     batteries_two_power: 71,
-                //     inverter_one_power: 85,
-                //     inverter_two_power: 77,
-                // },
+                StatsUpdate::Power(Power {
+                    batteries_one_power: 68,
+                    batteries_two_power: 71,
+                    inverter_one_power: 85,
+                    inverter_two_power: 77,
+                }),
                 StatsUpdate::Capacity(CapacityInfo {
                     charge_time: 0,
                     discharge_time: 5588,

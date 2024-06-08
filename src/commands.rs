@@ -1,17 +1,17 @@
-use anyhow::Context;
-use btleplug::{
-    api::{Central, CentralEvent, CharPropFlags, Peripheral as _, ScanFilter},
-    platform::{Adapter, Peripheral},
-};
-use futures::{stream, Stream, StreamExt};
-
 use crate::{
     exporter,
     protocol::{
-        device_info::build_device_info,
+        device_info::{build_device_info, FlashlightMode},
         notification::{process_notification, StatsUpdate},
+        request::request_to_buf,
     },
 };
+use anyhow::Context;
+use btleplug::{
+    api::{Central, CentralEvent, CharPropFlags, Peripheral as _, ScanFilter, WriteType},
+    platform::{Adapter, Peripheral},
+};
+use futures::{stream, Stream, StreamExt};
 
 pub async fn connect(adapter: &Adapter, device_name: &str) -> anyhow::Result<()> {
     println!("Scanning for devices...");
@@ -114,4 +114,49 @@ pub async fn exporter(adapter: &Adapter, device_name: &str, port: u16) -> anyhow
 
     let stream = setup_stats_stream(device).await?;
     exporter::run(port, stream).await
+}
+
+pub async fn flashlight(
+    adapter: &Adapter,
+    device_name: &str,
+    mode: Option<FlashlightMode>,
+) -> anyhow::Result<()> {
+    let peripheral = get_connected_device(adapter, device_name)
+        .await?
+        .context("Not connected to a device")?;
+
+    match mode {
+        Some(mode) => {
+            peripheral
+                .discover_services()
+                .await
+                .context("Could not discover services")?;
+            let write_characteristic = peripheral
+                .characteristics()
+                .into_iter()
+                .find(|characteristic| characteristic.properties.contains(CharPropFlags::WRITE))
+                .context("Could not find a write characteristic")?;
+
+            let request = [0x13, 0x01, 0x00, mode as u8];
+            peripheral
+                .write(
+                    &write_characteristic,
+                    &request_to_buf(&request),
+                    WriteType::WithoutResponse,
+                )
+                .await?;
+
+            println!("Set flashlight to {mode}");
+        }
+        None => {
+            let mut stream = setup_stats_stream(peripheral).await?;
+            while let Some(update) = stream.next().await {
+                if let StatsUpdate::FlashlightStatus(mode) = update {
+                    println!("Current flashlight mode is: {mode}");
+                    break;
+                }
+            }
+        }
+    }
+    Ok(())
 }

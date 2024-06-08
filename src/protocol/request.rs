@@ -1,4 +1,4 @@
-/*use crc16::{State, MODBUS};
+use crc16::{State, MODBUS};
 
 pub fn request_to_buf(value: &[u8]) -> Vec<u8> {
     let value_trimmed = trim_slice_start(value);
@@ -78,4 +78,4 @@ mod tests {
         let expected_data = vec![0x5a, 0xa5, 0xa1, 0xc0, 0x20, 0x00, 0x00, 0xa4, 0x13];
         assert_eq!(expected_data, output);
     }
-}*/
+}
